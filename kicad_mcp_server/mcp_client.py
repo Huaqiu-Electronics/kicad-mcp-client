@@ -45,7 +45,7 @@ class MCPClient :
                 )
                 logger.info(f"Summary: {res}")
                 try:
-                    self.sock.send(res.encode())
+                    self.sock.send(res.encode('utf-8'))
                 except pynng.Timeout:
                     pass
 
@@ -63,10 +63,10 @@ class MCPClient :
             if cmd_base is None:
                 print("Invalid command, missing cmd_type")
                 return
-            if cmd_base == CmdType.APPLY_SETTING :
+            if cmd_base == CmdType.apply_setting.value :
                 cmd = CmdApplySetting.model_validate(parsed)
                 self.setup_app(cmd)
-            elif cmd_base == CmdType.COMPLETE:
+            elif cmd_base == CmdType.complete.value:
                 cmd = CmdComplete.model_validate(parsed)
                 await self.complete(cmd)
             else:
