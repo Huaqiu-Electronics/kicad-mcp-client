@@ -1,26 +1,23 @@
 import asyncio
 import time
 import json
-from pathlib import Path
 from mcp_agent.app import MCPApp
-from mcp_agent.config import Settings
 from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
 import pynng
 import sys
+from kicad_mcp_server.proto.cmd_apply_setting import CmdApplySetting
+from kicad_mcp_server.proto.cmd_complete import CmdComplete
+from kicad_mcp_server.proto.cmd_type import CmdType
 from kicad_mcp_server.utils.usage import usage
-from kicad_mcp_server.utils.load_settings_from_json import load_settings_from_json
-
-
 
 class MCPClient :
     app : MCPApp | None = None
-    settings : Settings | None = None
 
     def __init__(self , sock : pynng.Pair0 ) -> None:
         self.sock = sock
 
-    async def complete(self, msg :str):
+    async def complete(self, cmd :CmdComplete):
 
         if self.app is None:
             return
@@ -36,14 +33,14 @@ class MCPClient :
 
             agent = Agent(
                 name="agent",
-                server_names=["markitdown", "playwright"],
+                server_names=cmd.server_names,
             )
 
             async with agent:
                 llm = await agent.attach_llm(OpenAIAugmentedLLM)
                 res = await llm.generate_str(
                     [
-                      msg
+                      cmd.msg
                     ]
                 )
                 logger.info(f"Summary: {res}")
@@ -52,16 +49,31 @@ class MCPClient :
                 except pynng.Timeout:
                     pass
 
-    def setup_app(self , config_str: str) :        
+    def setup_app(self , cmd: CmdApplySetting) :        
         try:
-            self.settings = load_settings_from_json("mcp_agent.config.json")
-            self.app = MCPApp(name="kicad_mcp_client", settings=self.settings)
+            self.app = MCPApp(name="kicad_mcp_client", settings=cmd.mcp_settings)
             
         except Exception as e:
             print("Error:", e)
 
     async def hdl_msg(self, msg :str):
-        await self.complete(msg)
+        try: 
+            parsed = json.loads(msg)
+            cmd_base = parsed.get("cmd_type", None)
+            if cmd_base is None:
+                print("Invalid command, missing cmd_type")
+                return
+            if cmd_base == CmdType.APPLY_SETTING :
+                cmd = CmdApplySetting.model_validate(parsed)
+                self.setup_app(cmd)
+            elif cmd_base == CmdType.COMPLETE:
+                cmd = CmdComplete.model_validate(parsed)
+                await self.complete(cmd)
+            else:
+                print("Invalid command:", cmd_base)
+        except Exception as e:
+            print("Error:", e)
+
    
     async def start(self):
         while True:
