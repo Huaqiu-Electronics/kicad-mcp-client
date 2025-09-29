@@ -88,10 +88,8 @@ class MCPClient :
             time.sleep(0.05)
 
 def start_client():
-    if len(sys.argv) < 2:
-        usage()
-
     with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
-        sock.dial(sys.argv[1])
+        url = "ipc:///tmp/kicad_copilot_pair.ipc" if len(sys.argv) < 2 else sys.argv[1]
+        sock.dial(url)
         client = MCPClient(sock)
         asyncio.run(client.start())
