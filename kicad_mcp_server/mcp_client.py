@@ -69,6 +69,10 @@ class MCPClient :
             elif cmd_base == CmdType.complete.value:
                 cmd = CmdComplete.model_validate(parsed)
                 await self.complete(cmd)
+            elif cmd_base == CmdType.quit.value:
+                self.sock.close()
+                sys.exit(0)
+    
             else:
                 print("Invalid command:", cmd_base)
         except Exception as e:
@@ -84,8 +88,6 @@ class MCPClient :
 
             except pynng.Timeout:
                 pass
-
-            time.sleep(0.05)
 
 def start_client():
     with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
