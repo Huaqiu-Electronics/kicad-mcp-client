@@ -1,8 +1,8 @@
 import asyncio
-import time
 import json
 from mcp_agent.app import MCPApp
 from mcp_agent.agents.agent import Agent
+
 from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
 import pynng
 import sys
@@ -12,7 +12,6 @@ from kicad_mcp_server.proto.cmd_type import CmdType
 from kicad_mcp_server.proto.mcp_complete_msg import MCP_COMPLETE_MSG
 from kicad_mcp_server.proto.mcp_status import MCP_STATUS
 from kicad_mcp_server.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
-from kicad_mcp_server.utils.usage import usage
 
 class MCPClient :
     app : MCPApp | None = None
@@ -32,7 +31,7 @@ class MCPClient :
             if context.config is not None:
                 logger.info("Current config:", data=context.config.model_dump())
             else:
-                logger.info("Current config: config is None")
+                logger.info("Current config: config is None")        
 
             agent = Agent(
                 name="agent",
@@ -40,15 +39,22 @@ class MCPClient :
             )
 
             async with agent:
-                llm = await agent.attach_llm(OpenAIAugmentedLLM)
-                msg = await llm.generate_str(
-                    [
-                      cmd.msg
-                    ]
-                )
-                logger.info(f"Summary: {msg}")   
+                try :
+                    llm = await agent.attach_llm(OpenAIAugmentedLLM)
+                    msg = await llm.generate_str(
+                        [
+                        cmd.msg
+                        ]
+                    )
+                    logger.info(f"Summary: {msg}")
 
-                return MCP_COMPLETE_MSG(msg=msg)
+                    if(len(msg) == 0):                        
+                        return MCP_STATUS_MSG(msg="No result from LLM, please check your MCP Settings" , code= MCP_STATUS.FAILURE)
+
+                    return MCP_COMPLETE_MSG(msg=msg)
+                except Exception as e:
+                    return MCP_STATUS_MSG(msg=str(e) , code= MCP_STATUS.FAILURE)
+
 
     def setup_app(self , cmd: CmdApplySetting) :        
         try:
