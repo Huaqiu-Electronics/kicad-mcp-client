@@ -12,6 +12,8 @@ from kicad_mcp_server.proto.cmd_type import CmdType
 from kicad_mcp_server.proto.mcp_complete_msg import MCP_COMPLETE_MSG
 from kicad_mcp_server.proto.mcp_status import MCP_STATUS
 from kicad_mcp_server.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
+import logging
+LOGGER = logging.getLogger()
 
 class MCPClient :
     app : MCPApp | None = None
@@ -101,8 +103,10 @@ class MCPClient :
                 pass
 
 def start_client():
+    LOGGER.info("Starting MCP Client")
     with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
         url = "ipc:///tmp/kicad_copilot_pair.ipc" if len(sys.argv) < 2 else sys.argv[1]
+        LOGGER.info("Listening to: ", url)
         sock.listen(url)
         client = MCPClient(sock)
         asyncio.run(client.start())
