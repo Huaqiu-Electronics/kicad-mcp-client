@@ -13,6 +13,9 @@ from kicad_mcp_server.proto.mcp_complete_msg import MCP_COMPLETE_MSG
 from kicad_mcp_server.proto.mcp_status import MCP_STATUS
 from kicad_mcp_server.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
 import logging
+from mcp_agent.config import Settings
+
+
 LOGGER = logging.getLogger()
 
 class MCPClient :
@@ -22,6 +25,9 @@ class MCPClient :
         self.sock = sock
 
     async def complete(self, cmd :CmdComplete):
+
+        if self.app is None and cmd.mcp_settings is not None:
+                self._setup_app(cmd.mcp_settings)
 
         if self.app is None:
             return MCP_STATUS_MSG(msg="Without valid settings, MCP app is not initialized" , code= MCP_STATUS.FAILURE)
@@ -59,12 +65,15 @@ class MCPClient :
 
 
     def setup_app(self , cmd: CmdApplySetting) :        
+        return self._setup_app(cmd.mcp_settings)
+    def _setup_app(self , mcp_settings : Settings) : 
         try:
-            self.app = MCPApp(name="kicad_mcp_client", settings=cmd.mcp_settings)
+            self.app = MCPApp(name="kicad_mcp_client", settings=mcp_settings)
             return MCP_STATUS_MSG_SUCCESS
             
         except Exception as e:
-             return MCP_STATUS_MSG(msg=str(e) , code= MCP_STATUS.FAILURE)
+             self.app = None
+             return MCP_STATUS_MSG(msg=str(e) , code= MCP_STATUS.FAILURE)        
 
     async def hdl_msg(self, msg :str):
         try: 
@@ -107,6 +116,7 @@ def start_client():
     with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
         url = "ipc:///tmp/kicad_copilot_pair.ipc" if len(sys.argv) < 2 else sys.argv[1]
         LOGGER.info("Listening to: ", url)
+        print("Listening to: ", url)
         sock.listen(url)
         client = MCPClient(sock)
         asyncio.run(client.start())
