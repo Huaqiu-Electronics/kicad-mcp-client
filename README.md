@@ -9,4 +9,4 @@ python .
 
 ## Environment
 
-Either pass the OPENAI_API_KEY in the frontend , or add it in the .env, the mcp-agent will read it automatically.
+Either pass the api_key in the frontend , or setting the OPENAI_API_KEY environment variable
