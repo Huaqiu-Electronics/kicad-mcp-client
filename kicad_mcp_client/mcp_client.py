@@ -6,12 +6,12 @@ from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
 import pynng
 import sys
-from kicad_mcp_server.proto.cmd_apply_setting import CmdApplySetting
-from kicad_mcp_server.proto.cmd_complete import CmdComplete
-from kicad_mcp_server.proto.cmd_type import CmdType
-from kicad_mcp_server.proto.mcp_complete_msg import MCP_COMPLETE_MSG
-from kicad_mcp_server.proto.mcp_status import MCP_STATUS
-from kicad_mcp_server.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
+from kicad_mcp_client.proto.cmd_apply_setting import CmdApplySetting
+from kicad_mcp_client.proto.cmd_complete import CmdComplete
+from kicad_mcp_client.proto.cmd_type import CmdType
+from kicad_mcp_client.proto.mcp_complete_msg import MCP_COMPLETE_MSG
+from kicad_mcp_client.proto.mcp_status import MCP_STATUS
+from kicad_mcp_client.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
 import logging
 from mcp_agent.config import Settings
 

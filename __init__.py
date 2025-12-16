@@ -5,7 +5,7 @@ try:
     MODULE_ROOT = os.path.dirname(os.path.abspath(__file__))
     if MODULE_ROOT not in sys.path:
         sys.path.append(MODULE_ROOT)
-    from kicad_mcp_server.mcp_client import start_client
+    from kicad_mcp_client.mcp_client import start_client
     start_client()
 
 except Exception as e:
