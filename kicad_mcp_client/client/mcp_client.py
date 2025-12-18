@@ -2,8 +2,10 @@ from mcp_agent.app import MCPApp
 from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
 from kicad_mcp_client.proto.cmd_complete import CmdComplete
-from kicad_mcp_client.proto.mcp_complete_msg import MCP_COMPLETE_MSG
-from kicad_mcp_client.proto.servers_assets import ServersAssets
+from kicad_mcp_client.proto.mcp_agent_msg import (
+    MCP_AGENT_CNF_CHANGED,
+    MCP_AGENT_COMPLETE,
+)
 
 
 class MCPClient:
@@ -29,7 +31,7 @@ class MCPClient:
                     raise Exception(
                         f"No result from LLM, please check your MCP Settings : {context.config}"
                     )
-                return MCP_COMPLETE_MSG(msg=msg)
+                return MCP_AGENT_COMPLETE(msg=msg)
 
     async def get_servers_assets(self, server_names: list[str]):
         async with self.app.run() as agent_app:
@@ -38,15 +40,14 @@ class MCPClient:
                 name="agent",
                 server_names=server_names,
             )
-            assets = ServersAssets(assets={})
-            async with self.app.run() as agent_app:
-                for server_name in agent.server_names:
-                    try:
-                        assets.assets[server_name] = [
-                            await agent.list_tools(server_name),
-                            await agent.list_prompts(server_name),
-                            await agent.list_resources(server_name),
-                        ]
-                    except Exception as e:
-                        logger.error(f"Error getting assets for {server_name}: {e}")
+            assets = MCP_AGENT_CNF_CHANGED(servers_assets={})
+            for server_name in agent.server_names:
+                try:
+                    assets.servers_assets[server_name] = [
+                        await agent.list_tools(server_name),
+                        await agent.list_prompts(server_name),
+                        await agent.list_resources(server_name),
+                    ]
+                except Exception as e:
+                    logger.error(f"Error getting assets for {server_name}: {e}")
             return assets

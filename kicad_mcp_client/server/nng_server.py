@@ -5,11 +5,10 @@ from kicad_mcp_client.proto.cmd_type import CmdType
 import sys
 from kicad_mcp_client.proto.cmd_apply_setting import CmdApplySetting
 from kicad_mcp_client.proto.cmd_complete import CmdComplete
-from kicad_mcp_client.proto.mcp_status import MCP_STATUS
-from kicad_mcp_client.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
 from mcp_agent.config import Settings
 from mcp_agent.app import MCPApp
 
+from kicad_mcp_client.proto.mcp_agent_msg import MCP_AGENT_EXCEPTION
 from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
     KICAD_MCP_SERVER_NAME,
     get_kicad_mcp_server_setting,
@@ -71,14 +70,14 @@ class NNG_SERVER:
             try:
                 msg = self.sock.recv().decode()
                 print("Receive msg: ", msg)
-                res = await self._route(msg) or MCP_STATUS_MSG_SUCCESS
+                res = await self._route(msg)
                 try:
                     self.sock.send(res.model_dump_json().encode("utf-8"))
                 except pynng.Timeout:
                     print("NNG send timeout")
                 except Exception as e:
                     self.sock.send(
-                        (MCP_STATUS_MSG(msg=str(e), code=MCP_STATUS.FAILURE))
+                        (MCP_AGENT_EXCEPTION(msg=str(e)))
                         .model_dump_json()
                         .encode("utf-8")
                     )
