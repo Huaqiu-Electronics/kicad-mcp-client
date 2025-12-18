@@ -13,7 +13,7 @@ from kicad_mcp_client.proto.cmd_complete import CmdComplete
 from kicad_mcp_client.proto.cmd_type import CmdType
 from kicad_mcp_client.proto.mcp_complete_msg import MCP_COMPLETE_MSG
 from kicad_mcp_client.proto.mcp_status import MCP_STATUS
-from kicad_mcp_client.proto.mcp_status_msg import MCP_STATUS_MSG
+from kicad_mcp_client.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
 import logging
 from mcp_agent.config import Settings
 
@@ -26,10 +26,7 @@ class MCPClient:
     app: MCPApp | None = None
 
     def get_kicad_mcp_server_setting(self) -> MCPServerSettings:
-        # mcp_client.py directory
         client_dir = Path(__file__).resolve().parent
-
-        # ../../kicad-mcp-server
         server_dir = (client_dir / ".." / ".." / "kicad-mcp-server").resolve()
         return MCPServerSettings(
             name=KICAD_MCP_SERVER_NAME,
@@ -99,21 +96,7 @@ class MCPClient:
                     self.get_kicad_mcp_server_setting()
                 )
             self.app = MCPApp(name="kicad_mcp_client", settings=mcp_settings)
-            async with self.app.run() as agent_app:
-                logger = agent_app.logger
-                context = agent_app.context
-
-                if context.config is not None:
-                    logger.info("Current config:", data=context.config.model_dump())
-                else:
-                    logger.info("Current config: config is None")
-
-                agent = Agent(
-                    name="agent",
-                )
-                async with agent:
-                    capabilities = agent.get_capabilities()
-            return capabilities
+            return MCP_STATUS_MSG_SUCCESS
 
         except Exception as e:
             self.app = None
