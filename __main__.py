@@ -1,4 +1,4 @@
 if __name__ == "__main__":
-    from kicad_mcp_client.launch_mcp_client import launch_mcp_client
+    from kicad_mcp_client.start_rec_send import start_rec_send
 
-    launch_mcp_client()
+    start_rec_send()

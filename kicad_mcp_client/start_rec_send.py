@@ -2,13 +2,14 @@ import asyncio
 
 import pynng
 import sys
-from kicad_mcp_client.mcp_client import MCPClient
 import logging
+
+from kicad_mcp_client.server.nng_server import NNG_SERVER
 
 LOGGER = logging.getLogger()
 
 
-def launch_mcp_client():
+def start_rec_send():
     LOGGER.info("Starting MCP Client")
     with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
         if len(sys.argv) < 3:
@@ -17,5 +18,5 @@ def launch_mcp_client():
         LOGGER.info("Listening to: ", url)
         print("Listening to: ", url)
         sock.listen(url)
-        client = MCPClient(sock, int(sys.argv[2]))
-        asyncio.run(client.start())
+        server = NNG_SERVER(sock, int(sys.argv[2]))
+        asyncio.run(server.rec_send())
