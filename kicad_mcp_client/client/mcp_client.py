@@ -27,17 +27,14 @@ class MCPClient:
             )
 
             async with agent:
-                try:
-                    llm = await agent.attach_llm(OpenAIAugmentedLLM)
-                    msg = await llm.generate_str([cmd.msg])
-                    logger.info(f"Summary: {msg}")
+                llm = await agent.attach_llm(OpenAIAugmentedLLM)
+                msg = await llm.generate_str([cmd.msg])
+                logger.info(f"Summary: {msg}")
 
-                    if len(msg) == 0:
-                        return MCP_STATUS_MSG(
-                            msg="No result from LLM, please check your MCP Settings",
-                            code=MCP_STATUS.FAILURE,
-                        )
+                if len(msg) == 0:
+                    return MCP_STATUS_MSG(
+                        msg="No result from LLM, please check your MCP Settings",
+                        code=MCP_STATUS.FAILURE,
+                    )
 
-                    return MCP_COMPLETE_MSG(msg=msg)
-                except Exception as e:
-                    return MCP_STATUS_MSG(msg=str(e), code=MCP_STATUS.FAILURE)
+                return MCP_COMPLETE_MSG(msg=msg)
