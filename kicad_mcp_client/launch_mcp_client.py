@@ -7,6 +7,7 @@ import logging
 
 LOGGER = logging.getLogger()
 
+
 def launch_mcp_client():
     LOGGER.info("Starting MCP Client")
     with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
