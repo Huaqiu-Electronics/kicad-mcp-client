@@ -4,7 +4,7 @@ from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
 import pynng
 import sys
-from kicad_mcp_client.get_kicad_mcp_server_setting import (
+from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
     KICAD_MCP_SERVER_NAME,
     get_kicad_mcp_server_setting,
 )
