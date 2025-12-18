@@ -71,5 +71,5 @@ class NNG_SERVER:
                         .encode("utf-8")
                     )
 
-            except pynng.Timeout:
-                pass
+            except Exception as e:
+                print(e)
