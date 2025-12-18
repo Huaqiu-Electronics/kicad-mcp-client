@@ -38,7 +38,13 @@ class NNG_SERVER:
 
         if cmd_base == CmdType.apply_settings.value:
             cmd = CmdApplySetting.model_validate(parsed)
-            return self.setup_mcp(cmd.mcp_settings)
+            self.setup_mcp(cmd.mcp_settings)
+
+            if self.mcp_client is None:
+                raise Exception("Initialize the MCPClient failed")
+
+            return await self.mcp_client.get_servers_assets()
+
         elif cmd_base == CmdType.complete.value:
             cmd = CmdComplete.model_validate(parsed)
             if self.mcp_client is None and cmd.mcp_settings is not None:

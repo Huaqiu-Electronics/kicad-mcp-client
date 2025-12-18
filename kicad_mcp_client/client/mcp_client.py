@@ -3,8 +3,7 @@ from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
 from kicad_mcp_client.proto.cmd_complete import CmdComplete
 from kicad_mcp_client.proto.mcp_complete_msg import MCP_COMPLETE_MSG
-from kicad_mcp_client.proto.mcp_status import MCP_STATUS
-from kicad_mcp_client.proto.mcp_status_msg import MCP_STATUS_MSG
+from kicad_mcp_client.proto.servers_assets import ServersAssets
 
 
 class MCPClient:
@@ -15,11 +14,6 @@ class MCPClient:
         async with self.app.run() as agent_app:
             logger = agent_app.logger
             context = agent_app.context
-
-            if context.config is not None:
-                logger.info("Current config:", data=context.config.model_dump())
-            else:
-                logger.info("Current config: config is None")
 
             agent = Agent(
                 name="agent",
@@ -32,9 +26,21 @@ class MCPClient:
                 logger.info(f"Summary: {msg}")
 
                 if len(msg) == 0:
-                    return MCP_STATUS_MSG(
-                        msg="No result from LLM, please check your MCP Settings",
-                        code=MCP_STATUS.FAILURE,
+                    raise Exception(
+                        f"No result from LLM, please check your MCP Settings : {context.config}"
                     )
-
                 return MCP_COMPLETE_MSG(msg=msg)
+
+    async def get_servers_assets(self):
+        async with self.app.run():
+            agent = Agent(
+                name="agent",
+            )
+            assets = ServersAssets(assets={})
+            async with agent:
+                for server_name in agent.server_names:
+                    assets.assets[server_name] = [
+                        await agent.list_tools(server_name),
+                        await agent.list_prompts(server_name),
+                        await agent.list_resources(server_name),
+                    ]
