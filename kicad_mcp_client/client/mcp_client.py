@@ -31,16 +31,22 @@ class MCPClient:
                     )
                 return MCP_COMPLETE_MSG(msg=msg)
 
-    async def get_servers_assets(self):
-        async with self.app.run():
+    async def get_servers_assets(self, server_names: list[str]):
+        async with self.app.run() as agent_app:
+            logger = agent_app.logger
             agent = Agent(
                 name="agent",
+                server_names=server_names,
             )
             assets = ServersAssets(assets={})
-            async with agent:
+            async with self.app.run() as agent_app:
                 for server_name in agent.server_names:
-                    assets.assets[server_name] = [
-                        await agent.list_tools(server_name),
-                        await agent.list_prompts(server_name),
-                        await agent.list_resources(server_name),
-                    ]
+                    try:
+                        assets.assets[server_name] = [
+                            await agent.list_tools(server_name),
+                            await agent.list_prompts(server_name),
+                            await agent.list_resources(server_name),
+                        ]
+                    except Exception as e:
+                        logger.error(f"Error getting assets for {server_name}: {e}")
+            return assets

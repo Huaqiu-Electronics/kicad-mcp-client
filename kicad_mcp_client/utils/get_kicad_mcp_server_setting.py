@@ -3,7 +3,7 @@ from mcp_agent.config import MCPServerSettings
 from kicad_mcp_client import MODULE_ROOT_DIR
 
 SERVER_DIR = (MODULE_ROOT_DIR / ".." / ".." / "kicad-mcp-server").resolve()
-KICAD_MCP_SERVER_NAME = "kicad-mcp-server"
+KICAD_MCP_SERVER_NAME = "kicad"
 
 
 def get_kicad_mcp_server_setting(port: int):

@@ -24,13 +24,19 @@ class NNG_SERVER:
         self.kicad_sdk_port = kicad_sdk_port
 
     def setup_mcp(self, mcp_settings: Settings):
-        if mcp_settings.mcp and mcp_settings.mcp.servers:
+        server_names = []
+        if mcp_settings.mcp:
+            if not mcp_settings.mcp.servers:
+                mcp_settings.mcp.servers = {}
+
             mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
                 get_kicad_mcp_server_setting(self.kicad_sdk_port)
             )
+            server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
             MCPApp(name="kicad_mcp_client", settings=mcp_settings)
         )
+        return server_names
 
     async def _route(self, msg: str):
         parsed = json.loads(msg)
@@ -38,12 +44,12 @@ class NNG_SERVER:
 
         if cmd_base == CmdType.apply_settings.value:
             cmd = CmdApplySetting.model_validate(parsed)
-            self.setup_mcp(cmd.mcp_settings)
+            server_names = self.setup_mcp(cmd.mcp_settings)
 
             if self.mcp_client is None:
                 raise Exception("Initialize the MCPClient failed")
 
-            return await self.mcp_client.get_servers_assets()
+            return await self.mcp_client.get_servers_assets(server_names)
 
         elif cmd_base == CmdType.complete.value:
             cmd = CmdComplete.model_validate(parsed)
@@ -76,6 +82,9 @@ class NNG_SERVER:
                         .model_dump_json()
                         .encode("utf-8")
                     )
+
+            except pynng.Timeout:
+                pass
 
             except Exception as e:
                 print(e)
