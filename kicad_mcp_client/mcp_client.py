@@ -1,4 +1,3 @@
-import asyncio
 import json
 from mcp_agent.app import MCPApp
 from mcp_agent.agents.agent import Agent
@@ -14,13 +13,9 @@ from kicad_mcp_client.proto.cmd_type import CmdType
 from kicad_mcp_client.proto.mcp_complete_msg import MCP_COMPLETE_MSG
 from kicad_mcp_client.proto.mcp_status import MCP_STATUS
 from kicad_mcp_client.proto.mcp_status_msg import MCP_STATUS_MSG, MCP_STATUS_MSG_SUCCESS
-import logging
 from mcp_agent.config import Settings
 
 KICAD_MCP_SERVER_NAME = "kicad-mcp-server"
-
-LOGGER = logging.getLogger()
-
 
 class MCPClient:
     app: MCPApp | None = None
@@ -48,7 +43,7 @@ class MCPClient:
 
     async def complete(self, cmd: CmdComplete):
         if self.app is None and cmd.mcp_settings is not None:
-            await self._setup_app(cmd.mcp_settings)
+            await self.setup_app(cmd.mcp_settings)
 
         if self.app is None:
             return MCP_STATUS_MSG(
@@ -86,10 +81,7 @@ class MCPClient:
                 except Exception as e:
                     return MCP_STATUS_MSG(msg=str(e), code=MCP_STATUS.FAILURE)
 
-    async def setup_app(self, cmd: CmdApplySetting):
-        return await self._setup_app(cmd.mcp_settings)
-
-    async def _setup_app(self, mcp_settings: Settings):
+    async def setup_app(self, mcp_settings: Settings):
         try:
             if mcp_settings.mcp and mcp_settings.mcp.servers:
                 mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
@@ -109,7 +101,7 @@ class MCPClient:
 
             if cmd_base == CmdType.apply_settings.value:
                 cmd = CmdApplySetting.model_validate(parsed)
-                await self.setup_app(cmd)
+                await self.setup_app(cmd.mcp_settings)
             elif cmd_base == CmdType.complete.value:
                 cmd = CmdComplete.model_validate(parsed)
                 return await self.complete(cmd)
@@ -140,14 +132,3 @@ class MCPClient:
                 pass
 
 
-def start_client():
-    LOGGER.info("Starting MCP Client")
-    with pynng.Pair0(recv_timeout=100, send_timeout=100) as sock:
-        if len(sys.argv) < 3:
-            print("Usage: python mcp_client.py <url> <kicad_sdk_port>")
-        url = sys.argv[1]
-        LOGGER.info("Listening to: ", url)
-        print("Listening to: ", url)
-        sock.listen(url)
-        client = MCPClient(sock, int(sys.argv[2]))
-        asyncio.run(client.start())
