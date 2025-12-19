@@ -1,6 +1,7 @@
 from enum import IntEnum
 from pydantic import BaseModel
 from mcp import ListPromptsResult, ListResourcesResult, ListToolsResult
+from mcp_agent.config import Settings
 
 
 class MCP_AGENT_MSG_TYPE(IntEnum):
@@ -25,3 +26,4 @@ class MCP_AGENT_CNF_CHANGED(BaseModel):
     servers_assets: dict[
         str, list[ListResourcesResult | ListPromptsResult | ListToolsResult]
     ]
+    mcp_settings: Settings

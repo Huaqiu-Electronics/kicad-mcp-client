@@ -1,9 +1,8 @@
-numpy < 1.17 ; python_version <= '2.7'
-numpy ; python_version >= '3.0'
+numpy
 pillow
 six
 requests
 wheel
-mcp-agent
-pynng
-openai
+pynng==0.8.1
+mcp-agent==0.1.32
+openai==2.2.0

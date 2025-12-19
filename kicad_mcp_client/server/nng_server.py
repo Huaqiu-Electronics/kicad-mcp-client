@@ -8,7 +8,10 @@ from kicad_mcp_client.proto.cmd_complete import CmdComplete
 from mcp_agent.config import Settings
 from mcp_agent.app import MCPApp
 
-from kicad_mcp_client.proto.mcp_agent_msg import MCP_AGENT_EXCEPTION
+from kicad_mcp_client.proto.mcp_agent_msg import (
+    MCP_AGENT_CNF_CHANGED,
+    MCP_AGENT_EXCEPTION,
+)
 from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
     KICAD_MCP_SERVER_NAME,
     get_kicad_mcp_server_setting,
@@ -48,7 +51,11 @@ class NNG_SERVER:
             if self.mcp_client is None:
                 raise Exception("Initialize the MCPClient failed")
 
-            return await self.mcp_client.get_servers_assets(server_names)
+            servers_assets = await self.mcp_client.get_servers_assets(server_names)
+            return MCP_AGENT_CNF_CHANGED(
+                servers_assets=servers_assets,
+                mcp_settings=cmd.mcp_settings,
+            )
 
         elif cmd_base == CmdType.complete.value:
             cmd = CmdComplete.model_validate(parsed)
