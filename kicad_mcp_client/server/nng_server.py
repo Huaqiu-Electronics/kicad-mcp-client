@@ -79,13 +79,13 @@ class NNG_SERVER:
                 print("Receive msg: ", msg)
                 res = await self._route(msg)
                 try:
-                    self.sock.send(res.model_dump_json().encode("utf-8"))
+                    self.sock.send(res.model_dump_json(exclude_none=True).encode("utf-8"))
                 except pynng.Timeout:
                     print("NNG send timeout")
                 except Exception as e:
                     self.sock.send(
                         (MCP_AGENT_EXCEPTION(msg=str(e)))
-                        .model_dump_json()
+                        .model_dump_json(exclude_none=True)
                         .encode("utf-8")
                     )
 
