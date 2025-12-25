@@ -6,7 +6,7 @@ SERVER_DIR = (MODULE_ROOT_DIR / ".." / ".." / "kicad-mcp-server").resolve()
 KICAD_MCP_SERVER_NAME = "kicad"
 
 
-def get_kicad_mcp_server_setting(port: int):
+def get_kicad_mcp_server_setting(url: str):
     print(f"[get_kicad_mcp_server_setting]: kicad-mcp-server dir is {SERVER_DIR}")
     return MCPServerSettings(
         name=KICAD_MCP_SERVER_NAME,
@@ -18,6 +18,6 @@ def get_kicad_mcp_server_setting(port: int):
             str(SERVER_DIR),
             "run",
             "main.py",
-            str(port),
+            url,
         ],
     )

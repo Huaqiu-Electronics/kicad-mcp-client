@@ -21,9 +21,9 @@ from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
 class NNG_SERVER:
     mcp_client: MCPClient | None = None
 
-    def __init__(self, sock: pynng.Pair0, kicad_sdk_port: int):
+    def __init__(self, sock: pynng.Pair0, kicad_sdk_url: str):
         self.sock = sock
-        self.kicad_sdk_port = kicad_sdk_port
+        self.kicad_sdk_url = kicad_sdk_url
 
     def setup_mcp(self, mcp_settings: Settings):
         server_names = []
@@ -32,7 +32,7 @@ class NNG_SERVER:
                 mcp_settings.mcp.servers = {}
 
             mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
-                get_kicad_mcp_server_setting(self.kicad_sdk_port)
+                get_kicad_mcp_server_setting(self.kicad_sdk_url)
             )
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
