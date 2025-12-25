@@ -8,7 +8,7 @@ from kicad_mcp_client.proto.cmd_apply_setting import CmdApplySetting
 from kicad_mcp_client.proto.cmd_complete import CmdComplete
 from mcp_agent.config import Settings
 from mcp_agent.app import MCPApp
-
+import pathlib
 from kicad_mcp_client.proto.mcp_agent_msg import (
     MCP_AGENT_CNF_CHANGED,
     MCP_AGENT_EXCEPTION,
@@ -36,7 +36,8 @@ class NNG_SERVER:
                 get_kicad_mcp_server_setting(self.kicad_sdk_url)
             )
             if mcp_settings.logger:
-                mcp_settings.logger.path = LOG_DIR
+                log_path = (pathlib.Path(LOG_DIR) /"logs/mcp-agent-{unique_id}.jsonl").absolute()
+                mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
             MCPApp(name="kicad_mcp_client", settings=mcp_settings)
