@@ -1,6 +1,7 @@
 import pynng
 import json
 from kicad_mcp_client.client.mcp_client import MCPClient
+from kicad_mcp_client.logs import LOG_DIR
 from kicad_mcp_client.proto.cmd_type import CmdType
 import sys
 from kicad_mcp_client.proto.cmd_apply_setting import CmdApplySetting
@@ -34,6 +35,8 @@ class NNG_SERVER:
             mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
                 get_kicad_mcp_server_setting(self.kicad_sdk_url)
             )
+            if mcp_settings.logger:
+                mcp_settings.logger.path = LOG_DIR
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
             MCPApp(name="kicad_mcp_client", settings=mcp_settings)
