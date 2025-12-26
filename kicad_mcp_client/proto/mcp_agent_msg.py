@@ -8,8 +8,8 @@ class MCP_AGENT_MSG_TYPE(IntEnum):
     INVALID = 0
     exception = 1
     complete = 2
-    cnf_changed = 3
-
+    cnf_changed = 3    
+    log = 4  # New log type
 
 class MCP_AGENT_EXCEPTION(BaseModel):
     type: MCP_AGENT_MSG_TYPE = MCP_AGENT_MSG_TYPE.exception
@@ -27,3 +27,11 @@ class MCP_AGENT_CNF_CHANGED(BaseModel):
         str, list[ListResourcesResult | ListPromptsResult | ListToolsResult]
     ]
     mcp_settings: Settings
+
+class MCP_AGENT_LOG(BaseModel):
+    type: MCP_AGENT_MSG_TYPE = MCP_AGENT_MSG_TYPE.log
+    level: str
+    namespace: str
+    message: str
+    data: dict | None = None
+    timestamp: str
