@@ -36,7 +36,9 @@ class NNG_SERVER:
                 get_kicad_mcp_server_setting(self.kicad_sdk_url)
             )
             if mcp_settings.logger:
-                log_path = (pathlib.Path(LOG_DIR) /"logs/mcp-agent-{unique_id}.jsonl").absolute()
+                log_path = (
+                    pathlib.Path(LOG_DIR) / "logs/mcp-agent-{unique_id}.jsonl"
+                ).absolute()
                 mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
@@ -83,7 +85,9 @@ class NNG_SERVER:
                 print("Receive msg: ", msg)
                 res = await self._route(msg)
                 try:
-                    self.sock.send(res.model_dump_json(exclude_none=True).encode("utf-8"))
+                    self.sock.send(
+                        res.model_dump_json(exclude_none=True).encode("utf-8")
+                    )
                 except pynng.Timeout:
                     print("NNG send timeout")
                 except Exception as e:
