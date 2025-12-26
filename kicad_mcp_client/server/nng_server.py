@@ -25,13 +25,16 @@ from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
 from mcp_agent.logging.transport import AsyncEventBus
 from mcp_agent.logging.listeners import EventListener
 from mcp_agent.logging.events import Event
+import os
 
 LOG_TO_FILE = False
+
 
 class NNGForwardingLogListener(EventListener):
     """
     Listener that forwards MCP Agent log events through the NNG socket.
     """
+
     def __init__(self, sock: pynng.Pair0):
         self.sock = sock
 
@@ -40,7 +43,7 @@ class NNGForwardingLogListener(EventListener):
 
         if event.type == "debug":
             return  # Skip debug logs
-        
+
         try:
             # Map the Event to your protocol's log model
             log_msg = MCP_AGENT_LOG(
@@ -48,14 +51,16 @@ class NNGForwardingLogListener(EventListener):
                 namespace=event.namespace,
                 message=event.message,
                 data=event.data,
-                timestamp=event.timestamp.isoformat()
+                timestamp=event.timestamp.isoformat(),
             )
-            
+
             # Send the serialized JSON over the socket
             self.sock.send(log_msg.model_dump_json(exclude_none=True).encode("utf-8"))
         except Exception as e:
             # Prevent logging errors from crashing the server
             print(f"[NNG Log Forwarder] Error: {e}")
+
+
 class NNG_SERVER:
     mcp_client: MCPClient | None = None
 
@@ -75,8 +80,17 @@ class NNG_SERVER:
             if not mcp_settings.mcp.servers:
                 mcp_settings.mcp.servers = {}
 
+            api_key = os.getenv("OPENAI_API_KEY")
+            base_url = os.getenv("OPENAI_BASE_URL")
+            default_model = os.getenv("OPENAI_DEFAULT_MODEL")
+
+            if mcp_settings.openai:
+                api_key = mcp_settings.openai.api_key
+                base_url = mcp_settings.openai.base_url
+                default_model = mcp_settings.openai.default_model
+
             mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
-                get_kicad_mcp_server_setting(self.kicad_sdk_url)
+                get_kicad_mcp_server_setting(self.kicad_sdk_url , api_key, base_url, default_model)
             )
 
             for name, server_config in mcp_settings.mcp.servers.items():
@@ -89,15 +103,15 @@ class NNG_SERVER:
                         f"[MCP] Resolved server '{name}' command: {original_cmd} -> {resolved_cmd}"
                     )
                     server_config.command = resolved_cmd
-            if mcp_settings.logger:     
-                if LOG_TO_FILE:       
+            if mcp_settings.logger:
+                if LOG_TO_FILE:
                     log_path = (
                         pathlib.Path(LOG_DIR) / "logs/mcp-agent-{unique_id}.jsonl"
                     ).absolute()
                     mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
                 else:
                     mcp_settings.logger.type = "console"
-                    mcp_settings.logger.level ="info"
+                    mcp_settings.logger.level = "info"
 
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
