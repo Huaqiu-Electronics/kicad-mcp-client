@@ -26,6 +26,8 @@ from mcp_agent.logging.transport import AsyncEventBus
 from mcp_agent.logging.listeners import EventListener
 from mcp_agent.logging.events import Event
 
+LOG_TO_FILE = False
+
 class NNGForwardingLogListener(EventListener):
     """
     Listener that forwards MCP Agent log events through the NNG socket.
@@ -87,11 +89,15 @@ class NNG_SERVER:
                         f"[MCP] Resolved server '{name}' command: {original_cmd} -> {resolved_cmd}"
                     )
                     server_config.command = resolved_cmd
-            if mcp_settings.logger:
-                log_path = (
-                    pathlib.Path(LOG_DIR) / "logs/mcp-agent-{unique_id}.jsonl"
-                ).absolute()
-                mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
+            if mcp_settings.logger:     
+                if LOG_TO_FILE:       
+                    log_path = (
+                        pathlib.Path(LOG_DIR) / "logs/mcp-agent-{unique_id}.jsonl"
+                    ).absolute()
+                    mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
+                else:
+                    mcp_settings.logger.type = "console"
+                    mcp_settings.logger.level ="info"
 
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
