@@ -13,6 +13,7 @@ from kicad_mcp_client.proto.mcp_agent_msg import (
     MCP_AGENT_CNF_CHANGED,
     MCP_AGENT_EXCEPTION,
 )
+from kicad_mcp_client.utils.get_cmd_absolute_path import get_cmd_absolute_path
 from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
     KICAD_MCP_SERVER_NAME,
     get_kicad_mcp_server_setting,
@@ -35,11 +36,23 @@ class NNG_SERVER:
             mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
                 get_kicad_mcp_server_setting(self.kicad_sdk_url)
             )
+
+            for name, server_config in mcp_settings.mcp.servers.items():
+                original_cmd = server_config.command
+                if not original_cmd:
+                    continue
+                resolved_cmd = get_cmd_absolute_path(original_cmd)
+                if resolved_cmd != original_cmd:
+                    print(
+                        f"[MCP] Resolved server '{name}' command: {original_cmd} -> {resolved_cmd}"
+                    )
+                    server_config.command = resolved_cmd
             if mcp_settings.logger:
                 log_path = (
                     pathlib.Path(LOG_DIR) / "logs/mcp-agent-{unique_id}.jsonl"
                 ).absolute()
                 mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
+
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
             MCPApp(name="kicad_mcp_client", settings=mcp_settings)
