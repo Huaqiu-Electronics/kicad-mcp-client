@@ -15,7 +15,7 @@ from kicad_mcp_client.proto.mcp_agent_msg import (
     MCP_AGENT_EXCEPTION,
     MCP_AGENT_LOG,
 )
-from kicad_mcp_client.utils.get_cmd_absolute_path import get_cmd_absolute_path
+from kicad_mcp_client.utils.get_cmd_absolute_path_and_args import get_cmd_absolute_path_and_args
 from kicad_mcp_client.utils.get_kicad_mcp_server_setting import (
     KICAD_MCP_SERVER_NAME,
     get_kicad_mcp_server_setting,
@@ -97,12 +97,10 @@ class NNG_SERVER:
                 original_cmd = server_config.command
                 if not original_cmd:
                     continue
-                resolved_cmd = get_cmd_absolute_path(original_cmd)
-                if resolved_cmd != original_cmd:
-                    print(
-                        f"[MCP] Resolved server '{name}' command: {original_cmd} -> {resolved_cmd}"
-                    )
-                    server_config.command = resolved_cmd
+                resolved_cmd, resolved_args = get_cmd_absolute_path_and_args(original_cmd, server_config.args)
+                print(f"[MCP] Resolved server '{name}' command: {original_cmd} -> {resolved_cmd} , args: {resolved_args} ")                    
+                server_config.command = resolved_cmd
+                server_config.args = resolved_args
             if mcp_settings.logger:
                 if LOG_TO_FILE:
                     log_path = (
