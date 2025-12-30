@@ -1,8 +1,6 @@
 import pynng
 import json
-import asyncio
 from kicad_mcp_client.client.mcp_client import MCPClient
-from kicad_mcp_client.logs import LOG_DIR
 from kicad_mcp_client.proto.cmd_type import CmdType
 import sys
 from kicad_mcp_client.proto.cmd_apply_setting import CmdApplySetting
@@ -27,7 +25,14 @@ from mcp_agent.logging.listeners import EventListener
 from mcp_agent.logging.events import Event
 import os
 
-LOG_TO_FILE = False
+DEBUG_MCP_CLIENT = os.getenv("DEBUG_MCP_CLIENT", "0") == "1"
+
+# Determine OS-independent writable directory
+if os.name == "nt":  # Windows
+    LOG_DIR = os.path.join(os.getenv("APPDATA", os.getenv("TEMP", os.getcwd())), "kicad-mcp", "kicad-mcp-server")
+else:  # Linux/MacOS
+    LOG_DIR = os.path.join(os.getenv("XDG_CACHE_HOME", os.path.join(os.getenv("HOME"), ".cache")), "kicad-mcp", "kicad-mcp-server")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 
 class NNGForwardingLogListener(EventListener):
@@ -102,9 +107,9 @@ class NNG_SERVER:
                 server_config.command = resolved_cmd
                 server_config.args = resolved_args
             if mcp_settings.logger:
-                if LOG_TO_FILE:
+                if DEBUG_MCP_CLIENT:
                     log_path = (
-                        pathlib.Path(LOG_DIR) / "logs/mcp-agent-{unique_id}.jsonl"
+                        pathlib.Path(LOG_DIR) / "mcp-agent-{unique_id}.jsonl"
                     ).absolute()
                     mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
                 else:
