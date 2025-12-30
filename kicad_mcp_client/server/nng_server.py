@@ -29,9 +29,9 @@ DEBUG_MCP_CLIENT = os.getenv("DEBUG_MCP_CLIENT", "0") == "1"
 
 # Determine OS-independent writable directory
 if os.name == "nt":  # Windows
-    LOG_DIR = os.path.join(os.getenv("APPDATA", os.getenv("TEMP", os.getcwd())), "kicad-mcp", "kicad-mcp-server")
+    LOG_DIR = os.path.join(os.getenv("APPDATA", os.getenv("TEMP", os.getcwd())), "kicad", "mcp", "kicad-mcp-client")
 else:  # Linux/MacOS
-    LOG_DIR = os.path.join(os.getenv("XDG_CACHE_HOME", os.path.join(os.getenv("HOME"), ".cache")), "kicad-mcp", "kicad-mcp-server")
+    LOG_DIR = os.path.join(os.getenv("XDG_CACHE_HOME", os.path.join(os.getenv("HOME"), ".cache")),  "kicad", "mcp", "kicad-mcp-client")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
