@@ -69,9 +69,10 @@ class NNGForwardingLogListener(EventListener):
 class NNG_SERVER:
     mcp_client: MCPClient | None = None
 
-    def __init__(self, sock: pynng.Pair0, kicad_sdk_url: str):
+    def __init__(self, sock: pynng.Pair0, kicad_sdk_url: str, editor_type: str):
         self.sock = sock
         self.kicad_sdk_url = kicad_sdk_url
+        self.editor_type = editor_type
         self._setup_logging_bridge()
 
     def _setup_logging_bridge(self):
@@ -95,7 +96,7 @@ class NNG_SERVER:
                 default_model = mcp_settings.openai.default_model
 
             mcp_settings.mcp.servers[KICAD_MCP_SERVER_NAME] = (
-                get_kicad_mcp_server_setting(self.kicad_sdk_url , api_key, base_url, default_model)
+                get_kicad_mcp_server_setting(self.kicad_sdk_url , api_key, base_url, default_model, self.editor_type)
             )
 
             for name, server_config in mcp_settings.mcp.servers.items():

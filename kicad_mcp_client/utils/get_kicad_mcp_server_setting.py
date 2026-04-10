@@ -7,7 +7,7 @@ KICAD_MCP_SERVER_NAME = "kicad"
 
 
 def get_kicad_mcp_server_setting(
-    url: str, api_key: str | None, base_url: str | None, default_model: str | None
+    url: str, api_key: str | None, base_url: str | None, default_model: str | None ,editor_type: str | None
 ):
     print(f"[get_kicad_mcp_server_setting]: kicad-mcp-server dir is {SERVER_DIR}")
     args = [
@@ -24,7 +24,9 @@ def get_kicad_mcp_server_setting(
     if base_url:
         args.extend(["--base-url", base_url])
     if default_model:
-        args.extend(["--model", default_model])
+        args.extend(["--model", default_model])    
+    if editor_type:
+        args.extend(["--editor-type", editor_type])
     
     return MCPServerSettings(
         name=KICAD_MCP_SERVER_NAME,
