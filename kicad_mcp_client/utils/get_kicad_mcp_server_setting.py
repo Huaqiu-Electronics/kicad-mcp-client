@@ -22,9 +22,8 @@ def get_kicad_mcp_server_setting(
         "--directory",
         str(SERVER_DIR),
         "run",
-        "main.py",
+        "kicad-mcp-server",
     ]
-
     if url:
         args.extend(["--socket-url", url])
 
