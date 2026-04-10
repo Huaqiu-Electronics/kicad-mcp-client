@@ -25,7 +25,7 @@ from mcp_agent.logging.listeners import EventListener
 from mcp_agent.logging.events import Event
 import os
 
-DEBUG_MCP_CLIENT = os.getenv("DEBUG_MCP_CLIENT", "0") == "1"
+KICAD_HQ_DEBUG_COPILOT = os.getenv("KICAD_HQ_DEBUG_COPILOT", "0") == "1"
 
 # Determine OS-independent writable directory
 if os.name == "nt":  # Windows
@@ -108,7 +108,7 @@ class NNG_SERVER:
                 server_config.command = resolved_cmd
                 server_config.args = resolved_args
             if mcp_settings.logger:
-                if DEBUG_MCP_CLIENT:
+                if KICAD_HQ_DEBUG_COPILOT:
                     log_path = (
                         pathlib.Path(LOG_DIR) / "mcp-agent-{unique_id}.jsonl"
                     ).absolute()
