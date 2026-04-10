@@ -2,7 +2,7 @@ from mcp_agent.config import MCPServerSettings
 
 from kicad_mcp_client import MODULE_ROOT_DIR
 
-SERVER_DIR = (MODULE_ROOT_DIR / ".." / ".." / "kicad-mcp-server").resolve()
+SERVER_DIR = (MODULE_ROOT_DIR / ".." / ".." / "kicad-mcp").resolve()
 KICAD_MCP_SERVER_NAME = "kicad"
 
 
@@ -13,7 +13,7 @@ def get_kicad_mcp_server_setting(
     default_model: str | None,
     editor_type: str | None,
 ):
-    print(f"[get_kicad_mcp_server_setting]: kicad-mcp-server dir is {SERVER_DIR}")
+    print(f"[get_kicad_mcp_server_setting]: kicad-mcp dir is {SERVER_DIR}")
 
     if not url and not editor_type:
         raise ValueError("Either url or editor_type must be provided")    
@@ -22,7 +22,7 @@ def get_kicad_mcp_server_setting(
         "--directory",
         str(SERVER_DIR),
         "run",
-        "kicad-mcp-server",
+        "kicad-mcp",
     ]
     if url:
         args.extend(["--socket-url", url])
