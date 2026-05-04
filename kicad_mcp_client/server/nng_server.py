@@ -5,7 +5,7 @@ from kicad_mcp_client.proto.cmd_type import CmdType
 import sys
 from kicad_mcp_client.proto.cmd_apply_setting import CmdApplySetting
 from kicad_mcp_client.proto.cmd_complete import CmdComplete
-from mcp_agent.config import Settings
+from mcp_agent.config import LoggerSettings, Settings
 from mcp_agent.app import MCPApp
 import pathlib
 from kicad_mcp_client.proto.mcp_agent_msg import (
@@ -114,8 +114,7 @@ class NNG_SERVER:
                     ).absolute()
                     mcp_settings.logger.path_settings.path_pattern = str(log_path)  # type: ignore
                 else:
-                    mcp_settings.logger.type = "console"
-                    mcp_settings.logger.level = "info"
+                    mcp_settings.logger = LoggerSettings()
 
             server_names = list(mcp_settings.mcp.servers.keys())
         self.mcp_client = MCPClient(
